@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Realm of Pages</title>
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+:root {
+  --bg:#0d0b14;
+  --bg2:#13111e;
+  --surface:#1a1728;
+  --text:#e8dfc8;
+  --text2:#9a8f7a;
+  --gold:#c8a040;
+  --gold2:#e8c060;
+  --shadow:rgba(0,0,0,0.6);
+}
+
+body {
+  font-family:'IM Fell English',serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow:hidden;
+}
+
+/* ── STARS BACKGROUND ── */
+.stars {
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+}
+.star {
+  position:absolute;
+  border-radius:50%;
+  background:white;
+}
+
+/* ── SCREENS ── */
+.screen {
+  position:fixed;
+  inset:0;
+  z-index:10;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transition:opacity .8s ease, transform .8s ease;
+}
+.screen.hidden {
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(12px);
+}
+
+/* ── INTRO SCREEN ── */
+#screen-intro {
+  background: radial-gradient(ellipse at center, #1a1430 0%, #0a0812 100%);
+  gap:0;
+  padding:2rem;
+}
+
+.intro-line {
+  font-family:'Cinzel',serif;
+  font-size:clamp(1rem,3vw,1.6rem);
+  color:var(--gold);
+  letter-spacing:.08em;
+  text-align:center;
+  opacity:0;
+  transform:translateY(16px);
+  transition:opacity 1.2s ease, transform 1.2s ease;
+  margin:.6rem 0;
+  text-shadow: 0 0 30px rgba(200,160,64,.4);
+}
+.intro-line.italic {
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  font-size:clamp(.9rem,2.5vw,1.3rem);
+  color:#c8b890;
+}
+.intro-line.big {
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(1.2rem,4vw,2.2rem);
+  color:var(--gold2);
+  text-shadow: 0 0 40px rgba(232,192,96,.6);
+}
+.intro-line.visible {
+  opacity:1;
+  transform:translateY(0);
+}
+
+.intro-divider {
+  width:200px;
+  height:1px;
+  background:linear-gradient(to right,transparent,var(--gold),transparent);
+  margin:1.2rem auto;
+  opacity:0;
+  transition:opacity 1.2s ease;
+}
+.intro-divider.visible { opacity:.6; }
+
+/* ── COMPANION SCREEN ── */
+#screen-companions {
+  background: radial-gradient(ellipse at center, #150f28 0%, #0a0812 100%);
+  overflow-y:auto;
+  padding:2rem 1rem 3rem;
+  justify-content:flex-start;
+  align-items:center;
+  gap:0;
+}
+
+.realm-title {
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(1.4rem,4vw,2.4rem);
+  color:var(--gold2);
+  text-align:center;
+  letter-spacing:.1em;
+  margin-bottom:.3rem;
+  text-shadow:0 0 40px rgba(232,192,96,.5);
+}
+.realm-sub {
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  font-size:clamp(.85rem,2vw,1.05rem);
+  color:var(--text2);
+  text-align:center;
+  letter-spacing:.06em;
+  margin-bottom:2.5rem;
+}
+
+.divider-gold {
+  width:280px;
+  height:1px;
+  background:linear-gradient(to right,transparent,var(--gold),transparent);
+  margin:.6rem auto 2rem;
+  opacity:.5;
+}
+
+/* companions grid */
+.companions-grid {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:0;
+  width:100%;
+  max-width:780px;
+}
+
+.companion-card {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  padding:22px 20px;
+  cursor:pointer;
+  border:1px solid transparent;
+  border-radius:4px;
+  transition:background .25s, border-color .25s, transform .25s;
+  position:relative;
+  min-width:120px;
+}
+.companion-card:hover {
+  background:rgba(200,160,64,.06);
+  border-color:rgba(200,160,64,.25);
+  transform:translateY(-6px);
+}
+.companion-card:hover .companion-name { color:var(--gold2); }
+.companion-card.selected {
+  background:rgba(200,160,64,.1);
+  border-color:rgba(200,160,64,.5);
+}
+
+.pixel-wrap {
+  width:80px;
+  height:80px;
+  position:relative;
+  image-rendering:pixelated;
+}
+.pixel-wrap svg { image-rendering:pixelated; }
+
+.companion-name {
+  font-family:'Cinzel',serif;
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--text);
+  transition:color .2s;
+  font-weight:600;
+}
+.companion-desc {
+  font-family:'IM Fell English',serif;
+  font-size:10px;
+  color:var(--text2);
+  font-style:italic;
+  letter-spacing:.04em;
+}
+
+.col-divider {
+  width:1px;
+  height:90px;
+  background:linear-gradient(to bottom,transparent,rgba(200,160,64,.2),transparent);
+  align-self:center;
+}
+.row-divider {
+  width:70%;
+  height:1px;
+  background:linear-gradient(to right,transparent,rgba(200,160,64,.15),transparent);
+  margin:8px auto;
+}
+
+/* spark particles */
+.spark { position:absolute; width:3px; height:3px; border-radius:0; pointer-events:none; }
+
+@keyframes bob     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+@keyframes sparkle { 0%,100%{opacity:0;transform:scale(0)} 50%{opacity:1;transform:scale(1)} }
+@keyframes notefly { 0%{opacity:0;transform:translate(0,0) rotate(-10deg)} 40%{opacity:1} 100%{opacity:0;transform:translate(8px,-14px) rotate(15deg)} }
+@keyframes shimmer { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+.anim-bob { animation:bob 2.8s ease-in-out infinite; transform-origin:center bottom; }
+.s-magic1{top:2px;left:10px;background:#ffe066;animation:sparkle 1.8s ease-in-out infinite;}
+.s-magic2{top:8px;left:58px;background:#ffe066;animation:sparkle 1.8s ease-in-out infinite .7s;}
+.s-magic3{top:0;left:34px;background:#ccaaff;animation:sparkle 1.8s ease-in-out infinite 1.3s;}
+.s-nature1{top:4px;left:6px;background:#66ff99;animation:sparkle 2s ease-in-out infinite .3s;}
+.s-nature2{top:2px;left:54px;background:#66ff99;animation:sparkle 2s ease-in-out infinite 1.1s;}
+.s-steel1{top:2px;left:44px;background:#aaddff;animation:sparkle 1.6s ease-in-out infinite .4s;}
+.s-steel2{top:6px;left:8px;background:#ffffff;animation:sparkle 1.6s ease-in-out infinite 1s;}
+.note{position:absolute;font-size:10px;color:#ffcc44;animation:notefly 2.2s ease-in-out infinite;font-weight:bold;pointer-events:none;}
+.note1{top:2px;left:52px;}
+.note2{top:8px;left:10px;animation-delay:1.1s;}
+
+/* ── CTA button ── */
+.begin-wrap {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.6rem;
+  margin-top:2rem;
+  opacity:0;
+  transition:opacity .8s ease;
+}
+.begin-wrap.visible { opacity:1; }
+
+.selected-label {
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  font-size:.9rem;
+  color:var(--gold);
+  letter-spacing:.06em;
+  min-height:1.2em;
+}
+
+.begin-btn {
+  font-family:'Cinzel',serif;
+  font-size:.85rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  padding:.8rem 2.4rem;
+  background:transparent;
+  border:1px solid var(--gold);
+  color:var(--gold2);
+  cursor:pointer;
+  transition:background .2s, color .2s, box-shadow .2s;
+  border-radius:2px;
+}
+.begin-btn:hover {
+  background:rgba(200,160,64,.12);
+  box-shadow:0 0 20px rgba(200,160,64,.3);
+}
+.begin-btn:disabled { opacity:.3; cursor:not-allowed; }
+
+/* ── TIMER SCREEN ── */
+#screen-timer {
+  background: radial-gradient(ellipse at center, #150f28 0%, #0a0812 100%);
+  overflow-y:auto;
+  padding:2rem 1rem;
+  justify-content:center;
+}
+
+.timer-layout {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:1.6rem;
+  width:100%;
+  max-width:500px;
+}
+
+/* companion + book info top */
+.session-header {
+  display:flex;
+  align-items:center;
+  gap:1.2rem;
+  background:rgba(200,160,64,.06);
+  border:1px solid rgba(200,160,64,.15);
+  border-radius:4px;
+  padding:.8rem 1.2rem;
+  width:100%;
+}
+.session-companion { width:48px; height:48px; image-rendering:pixelated; flex-shrink:0; }
+.session-info { display:flex; flex-direction:column; gap:.2rem; min-width:0; flex:1; }
+.session-companion-name {
+  font-family:'Cinzel',serif;
+  font-size:.75rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+.session-book-title {
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  font-size:.95rem;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.session-book-author {
+  font-family:'IM Fell English',serif;
+  font-size:.75rem;
+  color:var(--text2);
+}
+.session-book-cover {
+  width:36px;
+  height:52px;
+  border-radius:3px;
+  object-fit:cover;
+  border:1px solid rgba(200,160,64,.2);
+  flex-shrink:0;
+}
+.no-cover-sm {
+  width:36px;height:52px;
+  border-radius:3px;
+  background:rgba(200,160,64,.08);
+  border:1px solid rgba(200,160,64,.15);
+  flex-shrink:0;
+}
+
+/* ring */
+.ring-wrap {
+  position:relative;
+  width:260px;
+  height:260px;
+}
+.ring-svg {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  transform:rotate(-90deg);
+}
+.ring-bg   { fill:none; stroke:rgba(200,160,64,.12); stroke-width:4; }
+.ring-prog { fill:none; stroke:var(--gold); stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.ghost-center {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.time-text {
+  position:absolute;
+  bottom:16px;
+  left:0;right:0;
+  text-align:center;
+  font-family:'Cinzel',serif;
+  font-size:.85rem;
+  color:var(--text2);
+  letter-spacing:.1em;
+}
+
+/* controls */
+.timer-controls { display:flex; flex-direction:column; align-items:center; gap:1rem; }
+.time-row { display:flex; align-items:center; gap:.8rem; }
+.t-btn {
+  width:32px;height:32px;
+  border-radius:50%;
+  border:1px solid rgba(200,160,64,.3);
+  background:transparent;
+  color:var(--gold);
+  font-size:1.1rem;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.t-btn:hover { border-color:var(--gold); background:rgba(200,160,64,.1); }
+.t-disp {
+  font-family:'Cinzel',serif;
+  font-size:1.1rem;
+  min-width:70px;
+  text-align:center;
+  color:var(--text);
+  letter-spacing:.06em;
+}
+.btn-row { display:flex; gap:.7rem; }
+.cbtn {
+  padding:.6rem 1.4rem;
+  border-radius:2px;
+  border:1px solid rgba(200,160,64,.3);
+  font-family:'Cinzel',serif;
+  font-size:.72rem;
+  letter-spacing:.12em;
+  cursor:pointer;
+  transition:all .2s;
+  text-transform:uppercase;
+  background:transparent;
+}
+.cbtn.primary { color:var(--gold2); border-color:var(--gold); }
+.cbtn.primary:hover { background:rgba(200,160,64,.12); box-shadow:0 0 15px rgba(200,160,64,.2); }
+.cbtn.secondary { color:var(--text2); }
+.cbtn.secondary:hover { border-color:rgba(200,160,64,.3); color:var(--text); }
+
+/* HUD */
+.hud-top-left {
+  position:fixed;top:1.2rem;left:1.2rem;z-index:20;
+  display:flex;align-items:center;gap:.5rem;
+  background:rgba(13,11,20,.8);
+  border:1px solid rgba(200,160,64,.2);
+  border-radius:3px;
+  padding:.4rem .8rem;
+  font-family:'Cinzel',serif;
+  font-size:.72rem;
+  color:var(--gold);
+  letter-spacing:.08em;
+}
+.hud-top-right {
+  position:fixed;top:1.2rem;right:1.2rem;z-index:20;
+  display:flex;gap:.6rem;
+}
+.hud-btn {
+  width:38px;height:38px;
+  border-radius:3px;
+  border:1px solid rgba(200,160,64,.2);
+  background:rgba(13,11,20,.8);
+  cursor:pointer;
+  font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .25s;
+  color:var(--gold);
+}
+.hud-btn:hover { border-color:var(--gold); background:rgba(200,160,64,.1); }
+
+/* gold gain */
+@keyframes floatup { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-50px)} }
+@keyframes pop     { 0%{transform:scale(1)} 50%{transform:scale(1.2)} 100%{transform:scale(1)} }
+.cash-badge.pop { animation:pop .35s ease; }
+.particle { position:fixed;pointer-events:none;font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold);opacity:0;animation:floatup 1.4s ease forwards;z-index:100; }
+
+/* session msg */
+@keyframes slideup { from{opacity:0;transform:translateX(-50%) translateY(14px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+.sess-msg { position:fixed;bottom:3rem;left:50%;transform:translateX(-50%);background:rgba(13,11,20,.95);border:1px solid rgba(200,160,64,.3);border-radius:3px;padding:.65rem 1.3rem;font-family:'Cinzel',serif;font-size:.72rem;color:var(--gold);z-index:20;letter-spacing:.1em;white-space:nowrap;animation:slideup .4s ease; }
+
+/* wander */
+#ghost-wander { position:fixed;pointer-events:none;z-index:5;opacity:0;transition:opacity 1.2s; }
+@keyframes wfloat { 0%,100%{transform:translate(0,0) rotate(-1.5deg)} 35%{transform:translate(12px,-8px) rotate(1deg)} 70%{transform:translate(-6px,4px) rotate(-1deg)} }
+
+/* BOOK SEARCH on timer screen */
+.book-search-section {
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:.7rem;
+}
+.search-label {
+  font-family:'Cinzel',serif;
+  font-size:.7rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--text2);
+}
+.search-row { display:flex; gap:.6rem; }
+.book-input {
+  flex:1;
+  background:rgba(200,160,64,.05);
+  border:1px solid rgba(200,160,64,.2);
+  border-radius:3px;
+  padding:.6rem .8rem;
+  font-family:'IM Fell English',serif;
+  font-size:.95rem;
+  color:var(--text);
+  outline:none;
+  transition:border-color .2s;
+}
+.book-input:focus { border-color:rgba(200,160,64,.5); }
+.book-input::placeholder { color:var(--text2); font-style:italic; }
+.book-search-btn {
+  padding:.6rem 1rem;
+  border-radius:3px;
+  border:1px solid rgba(200,160,64,.3);
+  background:transparent;
+  color:var(--gold);
+  font-family:'Cinzel',serif;
+  font-size:.68rem;
+  letter-spacing:.1em;
+  cursor:pointer;
+  transition:all .2s;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.book-search-btn:hover { background:rgba(200,160,64,.1); border-color:var(--gold); }
+
+.book-results { display:flex;flex-direction:column;gap:.4rem;max-height:180px;overflow-y:auto; }
+.book-results::-webkit-scrollbar { width:3px; }
+.book-results::-webkit-scrollbar-thumb { background:rgba(200,160,64,.2);border-radius:2px; }
+.book-option {
+  display:flex;align-items:center;gap:.7rem;
+  padding:.5rem .7rem;
+  border-radius:3px;
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:all .2s;
+  background:rgba(200,160,64,.03);
+}
+.book-option:hover { border-color:rgba(200,160,64,.25);background:rgba(200,160,64,.07); }
+.book-option.selected { border-color:rgba(200,160,64,.4);background:rgba(200,160,64,.1); }
+.book-thumb { width:32px;height:46px;border-radius:3px;object-fit:cover;flex-shrink:0;background:rgba(200,160,64,.08); }
+.book-thumb-placeholder { width:32px;height:46px;border-radius:3px;background:rgba(200,160,64,.08);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.5rem;color:var(--text2);font-family:'Cinzel',serif;text-align:center;padding:2px; }
+.book-info { display:flex;flex-direction:column;gap:.15rem;min-width:0; }
+.book-title-opt { font-family:'IM Fell English',serif;font-size:.85rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.book-author-opt { font-family:'IM Fell English',serif;font-size:.7rem;color:var(--text2);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+
+.selected-book-display {
+  display:flex;align-items:center;gap:.9rem;
+  background:rgba(200,160,64,.05);
+  border:1px solid rgba(200,160,64,.2);
+  border-radius:3px;
+  padding:.8rem 1rem;
+  animation:slideup .4s ease;
+}
+.selected-cover { width:44px;height:64px;border-radius:3px;object-fit:cover;border:1px solid rgba(200,160,64,.2);flex-shrink:0; }
+.selected-book-info { display:flex;flex-direction:column;gap:.2rem;min-width:0;flex:1; }
+.selected-book-title { font-family:'IM Fell English',serif;font-size:.95rem;color:var(--text);font-weight:600; }
+.selected-book-author { font-family:'IM Fell English',serif;font-size:.75rem;color:var(--text2);font-style:italic; }
+.change-book-btn { font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.1em;color:var(--text2);background:none;border:none;cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .2s;text-transform:uppercase;margin-top:.2rem; }
+.change-book-btn:hover { color:var(--gold); }
+
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.spinner { width:18px;height:18px;border:2px solid rgba(200,160,64,.15);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin:.8rem auto; }
+.search-msg { font-family:'IM Fell English',serif;font-style:italic;font-size:.8rem;color:var(--text2);text-align:center;padding:.6rem; }
+
+/* SHOP MODAL */
+.overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:50;display:flex;align-items:center;justify-content:center;transition:opacity .3s; }
+.overlay.hidden { opacity:0;pointer-events:none; }
+.modal { background:#13111e;border:1px solid rgba(200,160,64,.25);border-radius:4px;padding:1.8rem;max-width:420px;width:92%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.8); }
+.modal-title { font-family:'Cinzel Decorative',serif;font-size:1.2rem;color:var(--gold2);margin-bottom:.2rem; }
+.modal-sub { font-family:'IM Fell English',serif;font-style:italic;font-size:.78rem;color:var(--text2);margin-bottom:1.4rem; }
+.shop-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.3rem; }
+.shop-item { background:rgba(200,160,64,.04);border-radius:3px;padding:.8rem .3rem;display:flex;flex-direction:column;align-items:center;gap:.3rem;border:1px solid rgba(200,160,64,.1);cursor:pointer;transition:all .2s; }
+.shop-item:hover { border-color:rgba(200,160,64,.4);transform:translateY(-2px);background:rgba(200,160,64,.08); }
+.shop-item.owned { border-color:rgba(100,200,100,.3); }
+.shop-item.equipped { border-color:var(--gold);background:rgba(200,160,64,.1); }
+.shop-icon { font-size:1.4rem; }
+.shop-name { font-family:'Cinzel',serif;font-size:.55rem;color:var(--text2);letter-spacing:.07em;text-align:center; }
+.shop-price { font-family:'Cinzel',serif;font-size:.6rem;color:var(--gold); }
+.shop-price.owned { color:var(--text2); }
+.modal-close { width:100%;padding:.7rem;border-radius:3px;border:1px solid rgba(200,160,64,.2);background:transparent;color:var(--text2);font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s; }
+.modal-close:hover { border-color:var(--gold);color:var(--gold); }
+
+/* ── BOOK SELECTION SCREEN ── */
+#screen-book {
+  background: radial-gradient(ellipse at center, #150f28 0%, #0a0812 100%);
+  padding: 2rem 1rem;
+  overflow-y: auto;
+  justify-content: flex-start;
+  padding-top: 3rem;
+}
+.book-screen-inner {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.8rem;
+  margin: 0 auto;
+}
+.book-screen-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+}
+.companion-mini-wrap {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  animation: bob 3s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+.book-screen-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(1.1rem, 3vw, 1.6rem);
+  color: var(--gold2);
+  text-align: center;
+  text-shadow: 0 0 30px rgba(232,192,96,.4);
+  letter-spacing: .08em;
+}
+.book-screen-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: .9rem;
+  color: var(--text2);
+  text-align: center;
+}
+.book-search-full {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+}
+.book-search-full .search-row {
+  display: flex;
+  gap: .6rem;
+}
+.book-search-full .book-input {
+  flex: 1;
+  background: rgba(200,160,64,.05);
+  border: 1px solid rgba(200,160,64,.2);
+  border-radius: 3px;
+  padding: .75rem 1rem;
+  font-family: 'IM Fell English', serif;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+}
+.book-search-full .book-input:focus { border-color: rgba(200,160,64,.5); }
+.book-search-full .book-input::placeholder { color: var(--text2); font-style: italic; }
+.book-search-full .book-search-btn {
+  padding: .75rem 1.2rem;
+  border-radius: 3px;
+  border: 1px solid rgba(200,160,64,.3);
+  background: transparent;
+  color: var(--gold);
+  font-family: 'Cinzel', serif;
+  font-size: .72rem;
+  letter-spacing: .1em;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.book-search-full .book-search-btn:hover { background: rgba(200,160,64,.1); border-color: var(--gold); }
+
+.book-results-full {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  max-height: 260px;
+  overflow-y: auto;
+  width: 100%;
+}
+.book-results-full::-webkit-scrollbar { width: 3px; }
+.book-results-full::-webkit-scrollbar-thumb { background: rgba(200,160,64,.2); border-radius: 2px; }
+
+.book-option-full {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: .7rem .9rem;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .2s;
+  background: rgba(200,160,64,.03);
+}
+.book-option-full:hover { border-color: rgba(200,160,64,.3); background: rgba(200,160,64,.07); }
+.book-option-full.selected { border-color: var(--gold); background: rgba(200,160,64,.1); }
+
+.book-thumb-full {
+  width: 42px;
+  height: 60px;
+  border-radius: 3px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(200,160,64,.08);
+  border: 1px solid rgba(200,160,64,.1);
+}
+.book-thumb-placeholder-full {
+  width: 42px;
+  height: 60px;
+  border-radius: 3px;
+  background: rgba(200,160,64,.06);
+  border: 1px solid rgba(200,160,64,.1);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: .55rem;
+  color: var(--text2);
+  text-align: center;
+}
+.book-info-full { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+.book-title-full {
+  font-family: 'IM Fell English', serif;
+  font-size: .95rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.book-author-full {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: .75rem;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.book-year-full {
+  font-family: 'Cinzel', serif;
+  font-size: .6rem;
+  color: var(--text2);
+  letter-spacing: .08em;
+  opacity: .7;
+}
+
+/* selected book card large */
+.selected-book-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: rgba(200,160,64,.06);
+  border: 1px solid rgba(200,160,64,.25);
+  border-radius: 4px;
+  padding: 1rem 1.2rem;
+  animation: slideup .4s ease;
+}
+.selected-book-card-cover {
+  width: 60px;
+  height: 88px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(200,160,64,.2);
+  box-shadow: 0 4px 16px rgba(0,0,0,.4);
+}
+.selected-book-card-info { display: flex; flex-direction: column; gap: .3rem; min-width: 0; flex: 1; }
+.selected-book-card-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.05rem;
+  color: var(--text);
+  font-weight: 600;
+}
+.selected-book-card-author {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: .8rem;
+  color: var(--text2);
+}
+.change-book-link {
+  font-family: 'Cinzel', serif;
+  font-size: .6rem;
+  letter-spacing: .1em;
+  color: var(--text2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-transform: uppercase;
+  transition: color .2s;
+  margin-top: .2rem;
+  align-self: flex-start;
+}
+.change-book-link:hover { color: var(--gold); }
+
+.enter-realm-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 3px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold2);
+  font-family: 'Cinzel', serif;
+  font-size: .88rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .3s;
+}
+.enter-realm-btn:hover {
+  background: rgba(200,160,64,.1);
+  box-shadow: 0 0 25px rgba(200,160,64,.25);
+}
+.enter-realm-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+.skip-book-link {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: .78rem;
+  color: var(--text2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color .2s;
+}
+.skip-book-link:hover { color: var(--text); }
+
+.back-btn {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  font-family: 'Cinzel', serif;
+  font-size: .65rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text2);
+  background: none;
+  border: 1px solid rgba(200,160,64,.15);
+  border-radius: 3px;
+  padding: .4rem .8rem;
+  cursor: pointer;
+  transition: all .2s;
+  z-index: 5;
+}
+.back-btn:hover { color: var(--gold); border-color: rgba(200,160,64,.4); }
+</style>
+</head>
+<body>
+
+<!-- STARS -->
+<div class="stars" id="stars"></div>
+
+<!-- ── INTRO SCREEN ── -->
+<div class="screen" id="screen-intro">
+  <div class="intro-line" id="l1">Em um reino muito distante...</div>
+  <div class="intro-divider" id="d1"></div>
+  <div class="intro-line italic" id="l2">Heróis buscavam força nas palavras</div>
+  <div class="intro-line italic" id="l3">para combater seus inimigos...</div>
+  <div class="intro-divider" id="d2"></div>
+  <div class="intro-line big" id="l4">Ajude-os!</div>
+</div>
+
+<!-- ── COMPANION SCREEN ── -->
+<div class="screen hidden" id="screen-companions">
+  <div class="realm-title">Realm of Pages</div>
+  <div class="realm-sub">Escolha seu companion de leitura</div>
+  <div class="divider-gold"></div>
+
+  <div class="companions-grid" id="companionsGrid"></div>
+
+  <div class="divider-gold" style="margin-top:1.5rem;"></div>
+
+  <div class="begin-wrap" id="beginWrap">
+    <div class="selected-label" id="selectedLabel">Nenhum companion selecionado</div>
+    <button class="begin-btn" id="beginBtn" disabled>Iniciar jornada</button>
+  </div>
+</div>
+
+
+<!-- ── BOOK SELECTION SCREEN ── -->
+<div class="screen hidden" id="screen-book">
+  <button class="back-btn" id="backToCompanions">← Voltar</button>
+  <div class="book-screen-inner">
+
+    <div class="book-screen-header">
+      <div class="companion-mini-wrap" id="bookScreenCompanion"></div>
+      <div class="book-screen-title">Qual grimório você carrega?</div>
+      <div class="book-screen-sub">Escolha o livro que acompanhará sua jornada</div>
+    </div>
+
+    <div class="divider-gold"></div>
+
+    <div class="book-search-full" id="bookSearchFull">
+      <div class="search-row">
+        <input class="book-input" id="bookInputFull" type="text" placeholder="Nome do livro, autor..." autocomplete="off">
+        <button class="book-search-btn" id="bookSearchBtnFull">Buscar</button>
+      </div>
+      <div id="bookSearchStateFull"></div>
+    </div>
+
+    <div class="divider-gold" style="margin:0;"></div>
+
+    <button class="enter-realm-btn" id="enterRealmBtn" disabled>Entrar no Realm ✦</button>
+    <button class="skip-book-link" id="skipBookBtn">Entrar sem grimório</button>
+
+  </div>
+</div>
+
+<!-- ── TIMER SCREEN ── -->
+<div class="screen hidden" id="screen-timer">
+  <!-- HUD -->
+  <div class="hud-top-left" id="cashBadge" style="display:none">
+    ✦ <span id="cashAmt">0</span> <span style="opacity:.5;margin-left:2px">ouro</span>
+  </div>
+  <div class="hud-top-right" id="hudRight" style="display:none">
+    <button class="hud-btn" id="shopBtn" title="Loja">🛍</button>
+  </div>
+
+  <!-- Wander companion -->
+  <div id="ghost-wander" style="width:56px;height:56px;"></div>
+
+  <div class="timer-layout">
+    <!-- session header -->
+    <div class="session-header" id="sessionHeader">
+      <div class="session-companion" id="sessionCompanion"></div>
+      <div class="session-info">
+        <div class="session-companion-name" id="sessionCompanionName"></div>
+        <div class="session-book-title" id="sessionBookTitle">Nenhum livro selecionado</div>
+        <div class="session-book-author" id="sessionBookAuthor"></div>
+      </div>
+      <div id="sessionCoverWrap"></div>
+    </div>
+
+    <!-- book search -->
+    <div class="book-search-section" id="bookSearchSection">
+      <div class="search-label">Qual grimório você está lendo?</div>
+      <div class="search-row">
+        <input class="book-input" id="bookInput" type="text" placeholder="Nome do livro..." autocomplete="off">
+        <button class="book-search-btn" id="bookSearchBtn">Buscar</button>
+      </div>
+      <div id="bookSearchState"></div>
+    </div>
+
+    <!-- ring timer -->
+    <div class="ring-wrap">
+      <svg class="ring-svg" viewBox="0 0 260 260">
+        <circle class="ring-bg"   cx="130" cy="130" r="110"/>
+        <circle class="ring-prog" id="ringProg" cx="130" cy="130" r="110" stroke-dasharray="691.15" stroke-dashoffset="0"/>
+      </svg>
+      <div class="ghost-center" id="timerGhostWrap"></div>
+      <div class="time-text" id="timeText">00:00</div>
+    </div>
+
+    <!-- controls -->
+    <div class="timer-controls">
+      <div class="time-row" id="timeRow">
+        <button class="t-btn" id="decT">−</button>
+        <div class="t-disp" id="tDisp">25 min</div>
+        <button class="t-btn" id="incT">+</button>
+      </div>
+      <div class="btn-row">
+        <button class="cbtn primary" id="playBtn">Iniciar</button>
+        <button class="cbtn secondary" id="resetBtn">Reiniciar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHOP MODAL -->
+<div class="overlay hidden" id="shopModal">
+  <div class="modal">
+    <div class="modal-title">Ferreiro do Reino</div>
+    <div class="modal-sub">Gaste seu ouro com sabedoria, viajante</div>
+    <div class="shop-grid" id="shopGrid"></div>
+    <button class="modal-close" id="shopClose">Fechar</button>
+  </div>
+</div>
+
+<script>
+// ── STARS ──
+(function(){
+  const c=document.getElementById("stars");
+  for(let i=0;i<120;i++){
+    const s=document.createElement("div");
+    s.className="star";
+    const sz=Math.random()*2+.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${Math.random()*.8+.1};animation:shimmer ${2+Math.random()*4}s ease-in-out infinite ${Math.random()*4}s`;
+    c.appendChild(s);
+  }
+})();
+
+// ── COMPANIONS DATA ──
+const COMPANIONS = [
+  {
+    id:"mago", name:"Mago", desc:"arcano · sábio", sparks:"magic",
+    svg:`<svg width="80" height="80" viewBox="0 0 16 16" style="image-rendering:pixelated">
+      <rect x="6" y="0" width="4" height="1" fill="#6633cc"/><rect x="5" y="1" width="6" height="1" fill="#7744dd"/>
+      <rect x="4" y="2" width="8" height="1" fill="#7744dd"/><rect x="3" y="3" width="10" height="1" fill="#8855ee"/>
+      <rect x="5" y="4" width="6" height="5" fill="#f0c898"/>
+      <rect x="6" y="6" width="1" height="1" fill="#aa88ff"/><rect x="9" y="6" width="1" height="1" fill="#aa88ff"/>
+      <rect x="5" y="8" width="6" height="1" fill="#ccbbff" opacity=".7"/>
+      <rect x="4" y="9" width="8" height="1" fill="#4422aa"/><rect x="3" y="10" width="10" height="2" fill="#3311aa"/>
+      <rect x="2" y="12" width="12" height="2" fill="#2200aa"/>
+      <rect x="4" y="11" width="1" height="1" fill="#ffe066"/><rect x="8" y="12" width="1" height="1" fill="#ffe066"/>
+      <rect x="12" y="11" width="1" height="1" fill="#ffe066" opacity=".7"/>
+      <rect x="14" y="5" width="1" height="7" fill="#8866cc"/><rect x="13" y="3" width="3" height="2" fill="#ffdd44" opacity=".9"/>
+      <rect x="5" y="14" width="2" height="1" fill="#2200aa"/><rect x="9" y="14" width="2" height="1" fill="#2200aa"/>
+    </svg>`
+  },
+  {
+    id:"cavaleiro", name:"Cavaleiro", desc:"leal · protetor", sparks:"steel",
+    svg:`<svg width="80" height="80" viewBox="0 0 16 16" style="image-rendering:pixelated">
+      <rect x="4" y="1" width="8" height="1" fill="#aabbcc"/><rect x="3" y="2" width="10" height="4" fill="#99aabb"/>
+      <rect x="5" y="3" width="6" height="1" fill="#223344"/><rect x="6" y="4" width="4" height="1" fill="#223344"/>
+      <rect x="4" y="2" width="2" height="2" fill="#ccddee" opacity=".6"/><rect x="7" y="0" width="2" height="2" fill="#cc2222"/>
+      <rect x="4" y="6" width="8" height="1" fill="#aabbcc"/><rect x="3" y="7" width="10" height="5" fill="#99aabb"/>
+      <rect x="6" y="8" width="4" height="1" fill="#778899"/><rect x="6" y="10" width="4" height="1" fill="#778899"/>
+      <rect x="2" y="7" width="2" height="3" fill="#aabbcc"/><rect x="12" y="7" width="2" height="3" fill="#aabbcc"/>
+      <rect x="14" y="3" width="1" height="7" fill="#ddddee"/><rect x="13" y="7" width="3" height="1" fill="#cc9900"/>
+      <rect x="1" y="7" width="2" height="4" fill="#cc3300"/><rect x="1" y="8" width="2" height="1" fill="#ffaa00" opacity=".8"/>
+      <rect x="5" y="12" width="2" height="2" fill="#778899"/><rect x="9" y="12" width="2" height="2" fill="#778899"/>
+      <rect x="4" y="14" width="3" height="1" fill="#445566"/><rect x="9" y="14" width="3" height="1" fill="#445566"/>
+    </svg>`
+  },
+  {
+    id:"druida", name:"Druida", desc:"natureza · misterioso", sparks:"nature",
+    svg:`<svg width="80" height="80" viewBox="0 0 16 16" style="image-rendering:pixelated">
+      <rect x="4" y="1" width="8" height="1" fill="#3d6b3d"/><rect x="3" y="2" width="10" height="1" fill="#4a7a4a"/>
+      <rect x="5" y="3" width="6" height="4" fill="#c8a878"/>
+      <rect x="6" y="5" width="1" height="1" fill="#00cc44"/><rect x="9" y="5" width="1" height="1" fill="#00cc44"/>
+      <rect x="3" y="3" width="2" height="4" fill="#3d6b3d"/><rect x="11" y="3" width="2" height="4" fill="#3d6b3d"/>
+      <rect x="3" y="7" width="10" height="1" fill="#4a7a4a"/><rect x="2" y="8" width="12" height="5" fill="#3d6b3d"/>
+      <rect x="6" y="9" width="4" height="1" fill="#66aa44"/><rect x="5" y="10" width="6" height="1" fill="#55993a"/>
+      <rect x="1" y="4" width="1" height="9" fill="#7a5c3a"/><rect x="0" y="2" width="3" height="1" fill="#7a5c3a"/>
+      <rect x="1" y="0" width="1" height="2" fill="#55cc44"/>
+      <rect x="13" y="4" width="3" height="3" fill="#00aa66" opacity=".9"/><rect x="14" y="5" width="1" height="1" fill="#aaffdd"/>
+      <rect x="5" y="13" width="2" height="2" fill="#3d6b3d"/><rect x="9" y="13" width="2" height="2" fill="#3d6b3d"/>
+      <rect x="4" y="15" width="3" height="1" fill="#7a5c3a"/><rect x="9" y="15" width="3" height="1" fill="#7a5c3a"/>
+    </svg>`
+  },
+  {
+    id:"arqueiro", name:"Arqueiro", desc:"preciso · ágil", sparks:"none",
+    svg:`<svg width="80" height="80" viewBox="0 0 16 16" style="image-rendering:pixelated">
+      <rect x="5" y="1" width="6" height="1" fill="#3d6b2a"/><rect x="4" y="2" width="8" height="3" fill="#4a7a33"/>
+      <rect x="3" y="3" width="2" height="2" fill="#3d6b2a"/><rect x="11" y="3" width="2" height="2" fill="#3d6b2a"/>
+      <rect x="5" y="5" width="6" height="3" fill="#d4a06a"/>
+      <rect x="8" y="6" width="2" height="1" fill="#2a1a08"/><rect x="9" y="6" width="1" height="1" fill="#ffffff" opacity=".5"/>
+      <rect x="4" y="8" width="8" height="1" fill="#4a7a33"/><rect x="4" y="9" width="8" height="4" fill="#3d6b2a"/>
+      <rect x="3" y="10" width="2" height="3" fill="#3d6b2a"/><rect x="11" y="10" width="2" height="3" fill="#3d6b2a"/>
+      <rect x="4" y="9" width="8" height="1" fill="#7a5c2a"/>
+      <rect x="13" y="7" width="1" height="5" fill="#7a5c2a"/>
+      <rect x="0" y="3" width="1" height="8" fill="#8a6a3a"/><rect x="0" y="10" width="1" height="1" fill="#8a6a3a"/>
+      <rect x="1" y="7" width="1" height="1" fill="#e0d0a0"/>
+      <rect x="2" y="7" width="9" height="1" fill="#c8a060"/><rect x="11" y="7" width="1" height="1" fill="#cc3322"/>
+      <rect x="5" y="13" width="2" height="2" fill="#3d6b2a"/><rect x="9" y="13" width="2" height="2" fill="#3d6b2a"/>
+      <rect x="4" y="15" width="3" height="1" fill="#2a1a08"/><rect x="9" y="15" width="3" height="1" fill="#2a1a08"/>
+    </svg>`
+  },
+  {
+    id:"paladino", name:"Paladino", desc:"sagrado · justo", sparks:"steel",
+    svg:`<svg width="80" height="80" viewBox="0 0 16 16" style="image-rendering:pixelated">
+      <rect x="4" y="1" width="8" height="1" fill="#cc9900"/><rect x="3" y="2" width="10" height="4" fill="#ddaa00"/>
+      <rect x="7" y="2" width="2" height="4" fill="#ffffff" opacity=".5"/><rect x="5" y="3" width="6" height="2" fill="#ffffff" opacity=".5"/>
+      <rect x="4" y="2" width="2" height="2" fill="#ffee88" opacity=".6"/><rect x="5" y="4" width="6" height="1" fill="#885500"/>
+      <rect x="4" y="6" width="8" height="1" fill="#ddaa00"/><rect x="3" y="7" width="10" height="5" fill="#cc9900"/>
+      <rect x="6" y="8" width="4" height="1" fill="#ffcc22"/><rect x="6" y="10" width="4" height="1" fill="#ffcc22"/>
+      <rect x="1" y="7" width="3" height="3" fill="#ddaa00"/><rect x="12" y="7" width="3" height="3" fill="#ddaa00"/>
+      <rect x="14" y="4" width="1" height="8" fill="#aa8800"/>
+      <rect x="13" y="3" width="3" height="2" fill="#ddaa00"/><rect x="13" y="3" width="3" height="1" fill="#ffee88"/>
+      <rect x="0" y="7" width="3" height="5" fill="#cc3300"/>
+      <rect x="1" y="7" width="1" height="5" fill="#ffffff" opacity=".6"/><rect x="0" y="9" width="3" height="1" fill="#ffffff" opacity=".6"/>
+      <rect x="5" y="12" width="2" height="2" fill="#cc9900"/><rect x="9" y="12" width="2" height="2" fill="#cc9900"/>
+      <rect x="4" y="14" width="3" height="1" fill="#885500"/><rect x="9" y="14" width="3" height="1" fill="#885500"/>
+    </svg>`
+  },
+  {
+    id:"bardo", name:"Bardo", desc:"criativo · carismático", sparks:"notes",
+    svg:`<svg width="80" height="80" viewBox="0 0 16 16" style="image-rendering:pixelated">
+      <rect x="3" y="2" width="10" height="1" fill="#992299"/><rect x="4" y="3" width="8" height="2" fill="#aa33aa"/>
+      <rect x="2" y="4" width="12" height="1" fill="#771177"/>
+      <rect x="12" y="0" width="1" height="3" fill="#ffcc44"/><rect x="11" y="1" width="1" height="1" fill="#ffee88"/>
+      <rect x="5" y="5" width="6" height="4" fill="#f0c070"/>
+      <rect x="6" y="6" width="2" height="1" fill="#331133"/><rect x="9" y="6" width="2" height="1" fill="#331133"/>
+      <rect x="6" y="7" width="1" height="1" fill="#331133"/><rect x="10" y="7" width="1" height="1" fill="#331133"/>
+      <rect x="6" y="8" width="4" height="1" fill="#cc6644"/>
+      <rect x="4" y="9" width="8" height="1" fill="#aa33aa"/><rect x="3" y="10" width="10" height="4" fill="#882288"/>
+      <rect x="5" y="10" width="2" height="2" fill="#ffcc00"/><rect x="9" y="10" width="2" height="2" fill="#ff4444"/>
+      <rect x="7" y="11" width="2" height="2" fill="#44aaff"/>
+      <rect x="0" y="8" width="1" height="5" fill="#8a6a3a"/><rect x="1" y="9" width="3" height="4" fill="#c8a060"/>
+      <rect x="1" y="11" width="3" height="1" fill="#8a6a3a"/>
+      <rect x="5" y="14" width="2" height="1" fill="#882288"/><rect x="9" y="14" width="2" height="1" fill="#882288"/>
+      <rect x="4" y="15" width="3" height="1" fill="#331133"/><rect x="9" y="15" width="3" height="1" fill="#331133"/>
+    </svg>`
+  },
+];
+
+const SHOP=[
+  {id:"hat_top",icon:"🎩",name:"Cartola",price:30,type:"hat"},
+  {id:"hat_crown",icon:"👑",name:"Coroa",price:60,type:"hat"},
+  {id:"hat_bow",icon:"🎀",name:"Laço",price:20,type:"hat"},
+  {id:"acc_star",icon:"⭐",name:"Estrela",price:15,type:"acc"},
+  {id:"acc_moon",icon:"🌙",name:"Lua",price:50,type:"acc"},
+  {id:"acc_scroll",icon:"📜",name:"Pergaminho",price:35,type:"acc"},
+];
+
+const S={companion:null,book:null,cash:0,mins:25,elapsed:0,running:false,iv:null,owned:[],hat:"",acc:"",wx:0,wy:0,wandering:false,wRaf:null};
+
+// ── INTRO ──
+function runIntro(){
+  const seq=[
+    {el:"l1",delay:600},{el:"d1",delay:1600},
+    {el:"l2",delay:2400},{el:"l3",delay:3400},
+    {el:"d2",delay:4200},{el:"l4",delay:5000},
+  ];
+  seq.forEach(({el,delay})=>{
+    setTimeout(()=>document.getElementById(el).classList.add("visible"),delay);
+  });
+  setTimeout(goCompanions, 7200);
+}
+
+function goCompanions(){
+  document.getElementById("screen-intro").classList.add("hidden");
+  const sc=document.getElementById("screen-companions");
+  sc.classList.remove("hidden");
+  buildCompanions();
+  setTimeout(()=>document.getElementById("beginWrap").classList.add("visible"),400);
+}
+
+// ── BUILD COMPANIONS ──
+function buildCompanions(){
+  const grid=document.getElementById("companionsGrid");
+  grid.innerHTML="";
+  const rows=[[0,1,2],[3,4,5]];
+  rows.forEach((row,ri)=>{
+    if(ri>0){
+      const rd=document.createElement("div");
+      rd.className="row-divider";
+      rd.style.cssText="width:100%;height:1px;background:linear-gradient(to right,transparent,rgba(200,160,64,.15),transparent);margin:4px 0;flex-basis:100%;";
+      grid.appendChild(rd);
+    }
+    row.forEach((idx,ci)=>{
+      if(ci>0){
+        const cd=document.createElement("div");cd.className="col-divider";
+        grid.appendChild(cd);
+      }
+      const c=COMPANIONS[idx];
+      const card=document.createElement("div");
+      card.className="companion-card";
+      card.style.animationDelay=(idx*.1)+"s";
+
+      // sparks
+      if(c.sparks==="magic"){
+        card.innerHTML=`<div class="spark s-magic1"></div><div class="spark s-magic2"></div><div class="spark s-magic3"></div>`;
+      }else if(c.sparks==="nature"){
+        card.innerHTML=`<div class="spark s-nature1"></div><div class="spark s-nature2"></div>`;
+      }else if(c.sparks==="steel"){
+        card.innerHTML=`<div class="spark s-steel1"></div><div class="spark s-steel2"></div>`;
+      }else if(c.sparks==="notes"){
+        card.innerHTML=`<div class="note note1">♪</div><div class="note note2">♫</div>`;
+      }
+
+      const pw=document.createElement("div");
+      pw.className="pixel-wrap anim-bob";
+      pw.style.animationDuration=(2.4+idx*.2)+"s";
+      pw.innerHTML=c.svg;
+      card.appendChild(pw);
+
+      const nm=document.createElement("div");nm.className="companion-name";nm.textContent=c.name;
+      const ds=document.createElement("div");ds.className="companion-desc";ds.textContent=c.desc;
+      card.appendChild(nm);card.appendChild(ds);
+
+      card.onclick=()=>{
+        document.querySelectorAll(".companion-card").forEach(x=>x.classList.remove("selected"));
+        card.classList.add("selected");
+        S.companion=c;
+        document.getElementById("selectedLabel").textContent=c.name+" está pronto para a jornada!";
+        document.getElementById("beginBtn").disabled=false;
+      };
+      grid.appendChild(card);
+    });
+  });
+}
+
+// ── BEGIN ──
+document.getElementById("beginBtn").onclick=()=>{
+  if(!S.companion)return;
+  document.getElementById("screen-companions").classList.add("hidden");
+  openBookScreen();
+};
+
+function openBookScreen(){
+  document.getElementById("screen-book").classList.remove("hidden");
+  const cw=document.getElementById("bookScreenCompanion");
+  cw.innerHTML=S.companion.svg.replace('width="80" height="80"','width="64" height="64"');
+  document.getElementById("enterRealmBtn").disabled=true;
+  S.book=null;
+  // reset search
+  document.getElementById("bookSearchFull").innerHTML=`
+    <div class="search-row">
+      <input class="book-input" id="bookInputFull" type="text" placeholder="Nome do livro, autor..." autocomplete="off">
+      <button class="book-search-btn" id="bookSearchBtnFull">Buscar</button>
+    </div>
+    <div id="bookSearchStateFull"></div>`;
+  bindBookSearchFull();
+}
+
+document.getElementById("backToCompanions").onclick=()=>{
+  document.getElementById("screen-book").classList.add("hidden");
+  document.getElementById("screen-companions").classList.remove("hidden");
+};
+document.getElementById("skipBookBtn").onclick=()=>{ S.book=null; goTimer(); };
+document.getElementById("enterRealmBtn").onclick=()=>{ goTimer(); };
+
+function goTimer(){
+  document.getElementById("screen-book").classList.add("hidden");
+  document.getElementById("screen-timer").classList.remove("hidden");
+  document.getElementById("cashBadge").style.display="flex";
+  document.getElementById("hudRight").style.display="flex";
+
+  // session companion
+  document.getElementById("sessionCompanion").innerHTML=S.companion.svg.replace('width="80" height="80"','width="48" height="48"');
+  document.getElementById("sessionCompanionName").textContent=S.companion.name;
+
+  // timer ghost
+  const gw=document.getElementById("timerGhostWrap");
+  const wrap=document.createElement("div");
+  wrap.style.cssText="width:90px;height:90px;";
+  wrap.innerHTML=S.companion.svg.replace('width="80" height="80"','width="90" height="90"');
+  wrap.style.animation="bob 3s ease-in-out infinite";
+  wrap.style.transformOrigin="center bottom";
+  gw.appendChild(wrap);
+
+  // wander
+  const wEl=document.getElementById("ghost-wander");
+  wEl.innerHTML=S.companion.svg.replace('width="80" height="80"','width="56" height="56"');
+  wEl.style.cssText="position:fixed;pointer-events:none;z-index:5;width:56px;height:56px;opacity:0;transition:opacity 1.2s;animation:wfloat 9s ease-in-out infinite;";
+  S.wx=window.innerWidth/2-28;S.wy=window.innerHeight/2-28;
+  wEl.style.left=S.wx+"px";wEl.style.top=S.wy+"px";
+
+  // session companion
+  document.getElementById('sessionCompanion').innerHTML=S.companion.svg.replace('width="80" height="80"','width="48" height="48"');
+  document.getElementById('sessionCompanionName').textContent=S.companion.name;
+
+  // timer ghost
+  const gw=document.getElementById('timerGhostWrap');
+  gw.innerHTML='';
+  const wrap=document.createElement('div');
+  wrap.style.cssText='width:90px;height:90px;animation:bob 3s ease-in-out infinite;transform-origin:center bottom;';
+  wrap.innerHTML=S.companion.svg.replace('width="80" height="80"','width="90" height="90"');
+  gw.appendChild(wrap);
+
+  // wander
+  const wEl=document.getElementById('ghost-wander');
+  wEl.innerHTML=S.companion.svg.replace('width="80" height="80"','width="56" height="56"');
+  wEl.style.cssText='position:fixed;pointer-events:none;z-index:5;width:56px;height:56px;opacity:0;transition:opacity 1.2s;animation:wfloat 9s ease-in-out infinite;';
+  S.wx=window.innerWidth/2-28;S.wy=window.innerHeight/2-28;
+  wEl.style.left=S.wx+'px';wEl.style.top=S.wy+'px';
+
+  // book info no header
+  if(S.book){
+    document.getElementById('sessionBookTitle').textContent=S.book.title;
+    document.getElementById('sessionBookAuthor').textContent=S.book.author;
+    const cw2=document.getElementById('sessionCoverWrap');
+    if(S.book.coverUrl){
+      cw2.innerHTML=`<img class="session-book-cover" src="${S.book.coverUrl}" alt="">`;
+    }else{
+      cw2.innerHTML='<div class="no-cover-sm"></div>';
+    }
+    // hide book search section in timer (already selected)
+    const bs=document.getElementById('bookSearchSection');
+    if(bs) bs.style.display='none';
+  }
+
+  document.getElementById('cashBadge').style.display='flex';
+  document.getElementById('hudRight').style.display='flex';
+  updateDisplay();
+  setTimeout(doWander,6000);
+}
+
+// ── BOOK SEARCH ──
+function setBookState(html){document.getElementById("bookSearchState").innerHTML=html;}
+
+async function searchBooks(q){
+  if(!q.trim())return;
+  setBookState('<div class="spinner"></div>');
+  try{
+    const url=`https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(q)}&maxResults=5&printType=books`;
+    const r=await fetch(url);
+    const data=await r.json();
+    const items=(data.items||[]);
+    if(!items.length){setBookState('<div class="search-msg">Nenhum grimório encontrado.</div>');return;}
+    const list=document.createElement("div");list.className="book-results";
+    items.forEach(item=>{
+      const info=item.volumeInfo||{};
+      const title=info.title||"Sem título";
+      const author=(info.authors||[]).join(", ")||"Autor desconhecido";
+      const thumb=info.imageLinks;
+      const coverUrl=thumb?(thumb.thumbnail||thumb.smallThumbnail||null):null;
+      const safeUrl=coverUrl?coverUrl.replace("http://","https://"):null;
+      const el=document.createElement("div");el.className="book-option";
+      el.innerHTML=safeUrl
+        ?`<img class="book-thumb" src="${safeUrl}" alt="" onerror="this.outerHTML='<div class=\\'book-thumb-placeholder\\'>?</div>'">`
+        :`<div class="book-thumb-placeholder">?</div>`;
+      el.innerHTML+=`<div class="book-info"><div class="book-title-opt">${title}</div><div class="book-author-opt">${author}</div></div>`;
+      el.onclick=()=>{
+        list.querySelectorAll(".book-option").forEach(i=>i.classList.remove("selected"));
+        el.classList.add("selected");
+        selectBook({title,author,coverUrl:safeUrl});
+      };
+      list.appendChild(el);
+    });
+    setBookState("");document.getElementById("bookSearchState").appendChild(list);
+  }catch(e){setBookState('<div class="search-msg">Erro ao buscar. Verifique sua conexão.</div>');}
+}
+
+function selectBook(book){
+  S.book=book;
+  document.getElementById("sessionBookTitle").textContent=book.title;
+  document.getElementById("sessionBookAuthor").textContent=book.author;
+  const cw=document.getElementById("sessionCoverWrap");
+  if(book.coverUrl){
+    cw.innerHTML=`<img class="session-book-cover" src="${book.coverUrl}" alt="">`;
+  }else{
+    cw.innerHTML=`<div class="no-cover-sm"></div>`;
+  }
+  // replace search with selected display
+  const section=document.getElementById("bookSearchSection");
+  const coverHtml=book.coverUrl
+    ?`<img class="selected-cover" src="${book.coverUrl}" alt="">`
+    :`<div style="width:44px;height:64px;border-radius:3px;background:rgba(200,160,64,.08);border:1px solid rgba(200,160,64,.15);flex-shrink:0;"></div>`;
+  section.innerHTML=`<div class="selected-book-display">${coverHtml}<div class="selected-book-info"><div class="selected-book-title">${book.title}</div><div class="selected-book-author">${book.author}</div><button class="change-book-btn" id="changeBookBtn">Trocar grimório</button></div></div>`;
+  document.getElementById("changeBookBtn").onclick=()=>{
+    section.innerHTML=`<div class="search-label">Qual grimório você está lendo?</div><div class="search-row"><input class="book-input" id="bookInput" type="text" placeholder="Nome do livro..." autocomplete="off"><button class="book-search-btn" id="bookSearchBtn">Buscar</button></div><div id="bookSearchState"></div>`;
+    S.book=null;
+    document.getElementById("sessionBookTitle").textContent="Nenhum livro selecionado";
+    document.getElementById("sessionBookAuthor").textContent="";
+    document.getElementById("sessionCoverWrap").innerHTML="";
+    bindBookSearch();
+  };
+}
+
+// ── BOOK SEARCH FULL SCREEN ──
+function setBookStateFull(html){document.getElementById('bookSearchStateFull').innerHTML=html;}
+
+async function searchBooksFull(q){
+  if(!q.trim())return;
+  setBookStateFull('<div class="spinner"></div>');
+  try{
+    const url=`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=6&printType=books`;
+    const r=await fetch(url);
+    const data=await r.json();
+    const items=(data.items||[]);
+    if(!items.length){setBookStateFull('<div class="search-msg">Nenhum grimório encontrado nas bibliotecas do reino.</div>');return;}
+
+    const list=document.createElement('div');
+    list.className='book-results-full';
+    items.forEach(item=>{
+      const info=item.volumeInfo||{};
+      const title=info.title||'Sem título';
+      const author=(info.authors||[]).join(', ')||'Autor desconhecido';
+      const year=info.publishedDate?info.publishedDate.slice(0,4):'';
+      const thumb=info.imageLinks;
+      const coverUrl=thumb?(thumb.thumbnail||thumb.smallThumbnail||null):null;
+      const safeUrl=coverUrl?coverUrl.replace('http://','https://'):null;
+
+      const el=document.createElement('div');
+      el.className='book-option-full';
+      el.innerHTML=safeUrl
+        ?`<img class="book-thumb-full" src="${safeUrl}" alt="" onerror="this.outerHTML='<div class=\'book-thumb-placeholder-full\'>?</div>'">`
+        :`<div class="book-thumb-placeholder-full">sem capa</div>`;
+      el.innerHTML+=`<div class="book-info-full"><div class="book-title-full">${title}</div><div class="book-author-full">${author}</div>${year?`<div class="book-year-full">${year}</div>`:''}</div>`;
+
+      el.onclick=()=>{
+        list.querySelectorAll('.book-option-full').forEach(i=>i.classList.remove('selected'));
+        el.classList.add('selected');
+        selectBookFull({title,author,coverUrl:safeUrl});
+      };
+      list.appendChild(el);
+    });
+    setBookStateFull('');
+    document.getElementById('bookSearchStateFull').appendChild(list);
+  }catch(e){
+    setBookStateFull('<div class="search-msg">Erro ao consultar as bibliotecas. Verifique sua conexão.</div>');
+  }
+}
+
+function selectBookFull(book){
+  S.book=book;
+  document.getElementById('enterRealmBtn').disabled=false;
+
+  // mostrar card de seleção
+  const section=document.getElementById('bookSearchFull');
+  const coverHtml=book.coverUrl
+    ?`<img class="selected-book-card-cover" src="${book.coverUrl}" alt="">`
+    :`<div style="width:60px;height:88px;border-radius:4px;background:rgba(200,160,64,.08);border:1px solid rgba(200,160,64,.15);flex-shrink:0;"></div>`;
+  section.innerHTML=`
+    <div class="selected-book-card">
+      ${coverHtml}
+      <div class="selected-book-card-info">
+        <div class="selected-book-card-title">${book.title}</div>
+        <div class="selected-book-card-author">${book.author}</div>
+        <button class="change-book-link" id="changeBtnFull">Trocar grimório</button>
+      </div>
+    </div>`;
+  document.getElementById('changeBtnFull').onclick=()=>{
+    S.book=null;
+    document.getElementById('enterRealmBtn').disabled=true;
+    section.innerHTML=`
+      <div class="search-row">
+        <input class="book-input" id="bookInputFull" type="text" placeholder="Nome do livro, autor..." autocomplete="off">
+        <button class="book-search-btn" id="bookSearchBtnFull">Buscar</button>
+      </div>
+      <div id="bookSearchStateFull"></div>`;
+    bindBookSearchFull();
+  };
+}
+
+function bindBookSearchFull(){
+  const btn=document.getElementById('bookSearchBtnFull');
+  const inp=document.getElementById('bookInputFull');
+  if(btn) btn.onclick=()=>searchBooksFull(inp.value);
+  if(inp){
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')searchBooksFull(e.target.value);});
+    inp.focus();
+  }
+}
+
+function bindBookSearch(){
+  const btn=document.getElementById("bookSearchBtn");
+  const inp=document.getElementById("bookInput");
+  if(btn) btn.onclick=()=>searchBooks(inp.value);
+  if(inp) inp.addEventListener("keydown",e=>{if(e.key==="Enter")searchBooks(e.target.value);});
+}
+
+// ── TIMER ──
+const CIRC=2*Math.PI*110;
+function updateDisplay(){
+  const total=S.mins*60,rem=total-S.elapsed;
+  document.getElementById("timeText").textContent=String(Math.floor(rem/60)).padStart(2,"0")+":"+String(rem%60).padStart(2,"0");
+  document.getElementById("tDisp").textContent=S.mins+" min";
+  document.getElementById("ringProg").style.strokeDashoffset=CIRC*(S.elapsed/total);
+}
+document.getElementById("incT").onclick=()=>{if(!S.running&&!S.elapsed){S.mins=Math.min(120,S.mins+5);updateDisplay();}};
+document.getElementById("decT").onclick=()=>{if(!S.running&&!S.elapsed){S.mins=Math.max(5,S.mins-5);updateDisplay();}};
+document.getElementById("playBtn").onclick=()=>S.running?pause():start();
+document.getElementById("resetBtn").onclick=reset;
+
+function start(){
+  S.running=true;document.getElementById("playBtn").textContent="Pausar";
+  document.getElementById("timeRow").style.opacity=".4";document.getElementById("timeRow").style.pointerEvents="none";
+  S.iv=setInterval(()=>{S.elapsed++;if(S.elapsed%60===0)addCash(5);if(S.elapsed>=S.mins*60)complete();updateDisplay();},1000);
+}
+function pause(){S.running=false;clearInterval(S.iv);document.getElementById("playBtn").textContent="Continuar";}
+function reset(){pause();S.elapsed=0;document.getElementById("playBtn").textContent="Iniciar";document.getElementById("timeRow").style.opacity="";document.getElementById("timeRow").style.pointerEvents="";updateDisplay();}
+function complete(){const b=S.mins;pause();addCash(b);S.elapsed=0;document.getElementById("playBtn").textContent="Iniciar";document.getElementById("timeRow").style.opacity="";document.getElementById("timeRow").style.pointerEvents="";updateDisplay();showMsg("✦ Missão cumprida! +"+b+" ouro conquistado!");}
+
+function addCash(n){
+  S.cash+=n;document.getElementById("cashAmt").textContent=S.cash;
+  const b=document.getElementById("cashBadge");b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");
+  const el=document.createElement("div");el.className="particle";el.textContent="+"+n+" ouro";
+  el.style.left=(Math.random()*60+20)+"vw";el.style.top="75vh";
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1500);
+}
+function showMsg(t){const el=document.createElement("div");el.className="sess-msg";el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),3500);}
+
+// ── WANDER ──
+function doWander(){
+  const w=document.getElementById("ghost-wander");
+  w.style.opacity=".25";
+  const mg=100;
+  S.wtx=mg+Math.random()*(window.innerWidth-mg*2)-28;
+  S.wty=mg+Math.random()*(window.innerHeight-mg*2)-28;
+  S.wandering=true;animWander();
+  setTimeout(returnCenter,5000+Math.random()*5000);
+}
+function animWander(){
+  if(!S.wandering)return;
+  const w=document.getElementById("ghost-wander");
+  S.wx+=(S.wtx-S.wx)*.012;S.wy+=(S.wty-S.wy)*.012;
+  w.style.left=S.wx+"px";w.style.top=S.wy+"px";
+  S.wRaf=requestAnimationFrame(animWander);
+}
+function returnCenter(){
+  cancelAnimationFrame(S.wRaf);
+  S.wtx=window.innerWidth/2-28;S.wty=window.innerHeight/2-28;animReturn();
+}
+function animReturn(){
+  const w=document.getElementById("ghost-wander");
+  const dx=S.wtx-S.wx,dy=S.wty-S.wy;
+  if(Math.hypot(dx,dy)<3){w.style.opacity="0";S.wandering=false;setTimeout(doWander,8000+Math.random()*8000);return;}
+  S.wx+=dx*.04;S.wy+=dy*.04;w.style.left=S.wx+"px";w.style.top=S.wy+"px";
+  requestAnimationFrame(animReturn);
+}
+
+// ── SHOP ──
+document.getElementById("shopBtn").onclick=()=>{buildShop();document.getElementById("shopModal").classList.remove("hidden");};
+document.getElementById("shopClose").onclick=()=>document.getElementById("shopModal").classList.add("hidden");
+function buildShop(){
+  const g=document.getElementById("shopGrid");g.innerHTML="";
+  SHOP.forEach(item=>{
+    const owned=S.owned.includes(item.id),equipped=owned&&S[item.type]===item.icon;
+    const div=document.createElement("div");
+    div.className="shop-item"+(equipped?" equipped":owned?" owned":"");
+    div.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-name">${item.name}</div><div class="shop-price ${owned?"owned":""}">${owned?(equipped?"Equipado":"Equipar"):item.price+" ouro"}</div>`;
+    div.onclick=()=>{
+      if(!owned){if(S.cash>=item.price){S.cash-=item.price;document.getElementById("cashAmt").textContent=S.cash;S.owned.push(item.id);S[item.type]=item.icon;buildShop();}else showMsg("Ouro insuficiente, viajante!");}
+      else{S[item.type]=equipped?"":item.icon;buildShop();}
+    };
+    g.appendChild(div);
+  });
+}
+
+// ── INIT ──
+runIntro();
+</script>
+</body>
+</html>
